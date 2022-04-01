@@ -1,4 +1,7 @@
-console.log('hello');
-export default function sum(a:number,b:number):number{
-    return a+b
+import packTool from './packTool.js'
+
+async function main(){
+    const compiler = await packTool()
+    compiler.run()
 }
+main()

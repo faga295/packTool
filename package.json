@@ -1,5 +1,5 @@
 {
-  "name": "packtool",
+  "name": "@faga/packtool",
   "version": "1.0.0",
   "description": "a pack tool integrating webpack and rollup",
   "main": "index.js",
@@ -24,8 +24,11 @@
   "files": [
     "dist/**/*"
   ],
+  "type": "module",
   "dependencies": {
     "@types/jest": "^27.4.1",
+    "fast-glob": "^3.2.11",
+    "tapable": "^2.2.1",
     "ts-jest": "^27.1.4",
     "ts-node": "^10.7.0"
   }
