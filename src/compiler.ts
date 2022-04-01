@@ -150,7 +150,7 @@ export default class Compiler{
         fs.writeFileSync(`${this.rootPath}/dist/output[${assetKey}].js`,this.assets[assetKey])
     }
     getSourceModule(chunk){
-        const {_source,modules} = chunk
+        const {source,modules} = chunk
         return `
         (() => {
             var __webpack_modules__ = {
@@ -158,7 +158,7 @@ export default class Compiler{
                 .map((module) => {
                   return `
                   '${module.id}': (module) => {
-                    ${module._source}
+                    ${module.source}
               }
                 `;
                 })
@@ -191,7 +191,7 @@ export default class Compiler{
             var __webpack_exports__ = {};
             // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
             (() => {
-              ${_source}
+              ${source}
             })();
           })();
         `
