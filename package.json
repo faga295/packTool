@@ -1,0 +1,22 @@
+{
+  "name": "packtool",
+  "version": "1.0.0",
+  "description": "a pack tool integrating webpack and rollup",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/faga1/packTool.git"
+  },
+  "author": "faga",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/faga1/packTool/issues"
+  },
+  "homepage": "https://github.com/faga1/packTool#readme",
+  "dependencies": {
+    "typescript": "^4.6.3"
+  }
+}

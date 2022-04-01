@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+      "target": "es5",
+      "module": "ESNext",
+      "declaration": true,
+      "outDir": "./dist",
+      "lib": ["esnext"]
+    },
+    "include": ["src"],
+    "exclude": ["node_modules", "**/__tests__/*"]
+  }
