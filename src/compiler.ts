@@ -93,8 +93,10 @@ export default class Compiler{
         return module
     }
     loadLoader(moduleName,code){
+        if(!this.options.module||!this.options.module.rules.length) return;
         const rules:rule[] = Array.from(this.options.module.rules);
         console.log(rules);
+
         rules.forEach(item => {
             if(item.test.test(moduleName)){
                 item.include.forEach(async loader => {

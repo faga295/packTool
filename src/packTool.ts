@@ -22,6 +22,7 @@ async function getOptions(){
 }
 function loadPlugin(options:Options,compiler:InstanceType<typeof Compiler>){
     const plugins = options.plugins
+    if(!plugins) return;
     for(const plugin of plugins){
         const instance = new plugin(compiler)
         instance.apply()
