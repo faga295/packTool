@@ -1,6 +1,6 @@
 {
   "name": "@faga/packtool",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "a pack tool integrating webpack and rollup",
   "main": "index.js",
   "scripts": {
@@ -19,18 +19,17 @@
   "homepage": "https://github.com/faga1/packTool#readme",
   "devDependencies": {
     "jest": "^27.5.1",
-    "typescript": "^4.6.3"
+    "typescript": "^4.6.3",
+    "ts-node": "^10.7.0",
+    "@types/jest": "^27.4.1",
+    "rollup": "^2.70.1",
+    "ts-jest": "^27.1.4"
   },
   "files": [
     "./bundle.js"
   ],
   "type": "module",
   "dependencies": {
-    "@types/jest": "^27.4.1",
-    "fast-glob": "^3.2.11",
-    "rollup": "^2.70.1",
-    "tapable": "^2.2.1",
-    "ts-jest": "^27.1.4",
-    "ts-node": "^10.7.0"
+    "tapable": "^2.2.1"
   }
 }
