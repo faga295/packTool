@@ -1,6 +1,6 @@
 {
   "name": "@faga/packtool",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "a pack tool integrating webpack and rollup",
   "main": "index.js",
   "scripts": {
