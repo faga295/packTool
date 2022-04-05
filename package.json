@@ -29,7 +29,8 @@
     "ts-jest": "^27.1.4"
   },
   "files": [
-    "./bundle.js"
+    "./bundle.js",
+    "./README.md"
   ],
   "type": "module",
   "dependencies": {
