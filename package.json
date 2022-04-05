@@ -1,13 +1,13 @@
 {
   "name": "@faga/packtool",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "a pack tool integrating webpack and rollup",
   "main": "index.js",
   "scripts": {
     "test": "jest --config jestconfig.json",
     "build": "tsc & rollup --config rollup.config.js",
     "publish": "npm version patch & npm publish",
-    "total":"npm run build & npm run publish"
+    "total": "npm run build & npm run publish"
   },
   "repository": {
     "type": "git",
