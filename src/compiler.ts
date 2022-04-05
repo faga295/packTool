@@ -1,7 +1,7 @@
 import { SyncHook } from "tapable";
 import { UnixPath,checkFile } from "./util.js";
 import type {Options} from './packTool'
-
+import MagicString from 'magic-string';
 import fs from 'fs'
 import path from 'path'
 interface rule{
@@ -51,14 +51,11 @@ export default class Compiler{
         this.buildEntry()
         this.buildChunk()
         this.exportFile()
-        console.log(this.chunk);
     }
     buildEntry(){
         if(typeof this.options.entry === 'string'){
             this.options.entry = [this.options.entry] 
         }
-        console.log(typeof this.options.entry);
-        
         this.options.entry.forEach(item=>{
             let entryObj:Entry= this.buildModule(item,path.resolve(this.rootPath,item))
             entryObj.name = Array.from(item.matchAll(/.*\/(.*)\.(j|t)s$/g))[0][1]
@@ -68,7 +65,7 @@ export default class Compiler{
     buildModule(moduleName,modulePath){
         const originCode = fs.readFileSync(modulePath,'utf-8')
         const module = this.moduleCompiler(moduleName,modulePath,originCode)
-        const completedCode = this.loadLoader(modulePath,originCode)
+        const completedCode = this.loadLoader(modulePath,module.source)
         module.source = completedCode
         return module;
     }
@@ -80,7 +77,10 @@ export default class Compiler{
             source:''
         }
         const reg = /\bimport\ (.*) from\ (.*)/g
+        const s = new MagicString(code);
         for(const moduleItem of Array.from(code.matchAll(reg))){
+            const tempItem = moduleItem as any;
+            s.overwrite(tempItem.index,tempItem.index+moduleItem[0].length,'')
             const requirePath = moduleItem[2].slice(1,-1)
             const moduleDir = path.dirname(modulePath)
             const moduleId = UnixPath(path.resolve(moduleDir,requirePath))
@@ -90,13 +90,17 @@ export default class Compiler{
             this.module.add(requireModule)
             this.alreadyModule.add(moduleId)
         }
+        const exReg = /\bexport/g
+        for(const moduleItem of Array.from(code.matchAll(exReg))){
+            const tempItem = moduleItem as any;
+            s.overwrite(tempItem.index,tempItem.index+tempItem[0].length,'')
+        }
+        module.source = s.toString()
         return module
     }
     loadLoader(moduleName,code){
         if(!this.options.module||!this.options.module.rules.length) return;
         const rules:rule[] = Array.from(this.options.module.rules);
-        console.log(rules);
-
         rules.forEach(item => {
             if(item.test.test(moduleName)){
                 item.include.forEach(async loader => {
@@ -107,10 +111,7 @@ export default class Compiler{
         return code
     }
     buildChunk(){
-        console.log('entry' ,this.entry);
-        
         for(const item of this.entry){
-            console.log(typeof item);
             const entry = item as Entry
             const chunk ={
                 name:entry.name,
@@ -154,48 +155,10 @@ export default class Compiler{
     getSourceModule(chunk){
         const {source,modules} = chunk
         return `
-        (() => {
-            var __webpack_modules__ = {
-              ${modules
-                .map((module) => {
-                  return `
-                  '${module.id}': (module) => {
-                    ${module.source}
-              }
-                `;
-                })
-                .join(',')}
-            };
-            // The module cache
-            var __webpack_module_cache__ = {};
-        
-            // The require function
-            function __webpack_require__(moduleId) {
-              // Check if module is in cache
-              var cachedModule = __webpack_module_cache__[moduleId];
-              if (cachedModule !== undefined) {
-                return cachedModule.exports;
-              }
-              // Create a new module (and put it into the cache)
-              var module = (__webpack_module_cache__[moduleId] = {
-                // no module.id needed
-                // no module.loaded needed
-                exports: {},
-              });
-        
-              // Execute the module function
-              __webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-        
-              // Return the exports of the module
-              return module.exports;
-            }
-        
-            var __webpack_exports__ = {};
-            // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
-            (() => {
-              ${source}
-            })();
-          })();
+            ${modules.map(item=>{
+                return item.source
+            })}
+            ${source}
         `
     }
 }
