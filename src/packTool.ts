@@ -12,7 +12,7 @@ export default async function packTool(){
     const {default:options} = await getOptions()
     const compiler = new Compiler(options)
     loadPlugin(options,compiler)
-    return new Compiler(options)
+    return compiler
 }
 async function getOptions(){
     const isExist = await checkFile(UnixPath(process.cwd())+'/packTool.config.js')
@@ -23,8 +23,8 @@ async function getOptions(){
 function loadPlugin(options:Options,compiler:InstanceType<typeof Compiler>){
     const plugins = options.plugins
     if(!plugins) return;
-    for(const plugin of plugins){
-        const instance = new plugin(compiler)
+    for(let i=0;i<plugins.length;i++){
+        const instance = new plugins[i](compiler)
         instance.apply()
     }
 }

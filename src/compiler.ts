@@ -47,7 +47,7 @@ export default class Compiler{
         this.files = new Set<any>()
     }
     run(){
-        this.hooks.run.call('plugin1')
+        this.hooks.run.call('')
         this.buildEntry()
         this.buildChunk()
         this.exportFile()
