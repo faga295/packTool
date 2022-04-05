@@ -57,7 +57,7 @@ export default class Compiler{
             this.options.entry = [this.options.entry] 
         }
         this.options.entry.forEach(item=>{
-            let entryObj:Entry= this.buildModule(item,path.resolve(this.rootPath,item))
+            let entryObj:Entry= this.buildModule(item,UnixPath(path.resolve(this.rootPath,item)))
             entryObj.name = Array.from(item.matchAll(/.*\/(.*)\.(j|t)s$/g))[0][1]
             this.entry.add(entryObj)
         })
@@ -98,12 +98,13 @@ export default class Compiler{
         module.source = s.toString()
         return module
     }
-    loadLoader(moduleName,code){
+    loadLoader(modulePath,code){
         if(!this.options.module||!this.options.module.rules.length) return;
         const rules:rule[] = Array.from(this.options.module.rules);
         rules.forEach(item => {
-            if(item.test.test(moduleName)){
-                item.include.forEach(async loader => {
+            if(item.test.test(modulePath)){
+                item.test.lastIndex = 0;
+                item.include.forEach(loader => {
                     code = loader(code)
                 })
             }
@@ -154,11 +155,6 @@ export default class Compiler{
     }
     getSourceModule(chunk){
         const {source,modules} = chunk
-        return `
-            ${modules.map(item=>{
-                return item.source
-            })}
-            ${source}
-        `
+        return `${modules.map(item=>item.source)}${source}`
     }
 }
