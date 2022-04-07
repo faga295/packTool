@@ -6,7 +6,8 @@ export interface  Options{
     entry:string|string[],
     output:string,
     plugins:Array<typeof plugin1>,
-    module:any
+    module:any,
+    format:string
 }
 export default async function packTool(){
     const {default:options} = await getOptions()

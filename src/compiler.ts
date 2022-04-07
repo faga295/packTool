@@ -1,9 +1,12 @@
 import { SyncHook } from "tapable";
+import type { Program,Node } from 'estree'
 import { UnixPath,checkFile } from "./util.js";
 import type {Options} from './packTool'
 import MagicString from 'magic-string';
 import fs from 'fs'
 import path from 'path'
+import acorn, { parse } from 'acorn'
+
 interface rule{
     test:RegExp,
     include:Function[]
@@ -62,19 +65,22 @@ export default class Compiler{
             this.entry.add(entryObj)
         })
     }
-    buildModule(moduleName,modulePath){
+    buildModule(moduleName:string,modulePath:string){
         const originCode = fs.readFileSync(modulePath,'utf-8')
         const module = this.moduleCompiler(moduleName,modulePath,originCode)
         const completedCode = this.loadLoader(modulePath,module.source)
         module.source = completedCode
         return module;
     }
-    moduleCompiler(moduleName,modulePath,code){
+    moduleCompiler(moduleName:string,modulePath:string,code:string){
         const module = {
             name:moduleName,
             id:modulePath,
             dependenices:new Set(),
             source:''
+        }
+        if(this.options.format === 'esm'){
+            code = this.compileCommonJs(code)
         }
         const reg = /\bimport\ (.*) from\ (.*)/g
         const s = new MagicString(code);
@@ -97,6 +103,19 @@ export default class Compiler{
         }
         module.source = s.toString()
         return module
+    }
+    compileCommonJs(code:string):string{
+        const reg = /\w*\x20*({?\w*}?)\x20*=\x20*\brequire\((.*)\)/g
+        const s = new MagicString(code)
+        for(const item of Array.from(code.matchAll(reg))){
+            let str = item[1]
+            if(str[0]==='{'&&str[str.length-1]==='}'){
+                str = str.slice(1,-1)
+            }
+            s.overwrite(item.index,item.index+item[0].length,`import {${item[1]}} from '${item[2].slice(1,-1)}'`)
+        }
+        const exReg = /\bexports|\bmodule.exports()/
+        return s.toString();
     }
     loadLoader(modulePath,code){
         if(!this.options.module||!this.options.module.rules.length) return;
