@@ -37,6 +37,8 @@
   "dependencies": {
     "@types/estree": "^0.0.51",
     "acorn": "^8.7.0",
+    "express": "^4.17.3",
+    "lodash": "^4.17.21",
     "magic-string": "^0.26.1",
     "tapable": "^2.2.1"
   }

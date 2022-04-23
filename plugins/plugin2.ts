@@ -1,7 +1,7 @@
-import Compiler from '../src/compiler'
+import type { CompilerInstance } from "../src/type";
 export default class plugin2{
-    compiler:InstanceType<typeof Compiler>
-    constructor(compiler:InstanceType<typeof Compiler>){
+    compiler:CompilerInstance
+    constructor(compiler:CompilerInstance){
         this.compiler = compiler;
     }
     apply(){

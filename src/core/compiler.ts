@@ -1,29 +1,13 @@
 import { SyncHook } from "tapable";
 import type { Program,Node } from 'estree'
 import { UnixPath,checkFile } from "./util.js";
-import type {Options} from './packTool'
+import type {Options} from '../type.js'
 import MagicString from 'magic-string';
 import fs from 'fs'
 import path from 'path'
 import acorn, { parse } from 'acorn'
+import type {rule,Entry,Chunk} from '../type.js'
 
-interface rule{
-    test:RegExp,
-    include:Function[]
-}
-interface Entry{
-    name:string,
-    dependenices:InstanceType<typeof Set>,
-    id:string,
-    source:string,
-}
-interface Chunk{
-    name:string,
-    dependenices:InstanceType<typeof Set>
-    id:string,
-    source:string,
-    module:InstanceType<typeof Set>
-}
 export default class Compiler{
     options:Options;
     hooks:Record<string,InstanceType<typeof SyncHook>>
@@ -68,6 +52,7 @@ export default class Compiler{
     buildModule(moduleName:string,modulePath:string){
         const originCode = fs.readFileSync(modulePath,'utf-8')
         const module = this.moduleCompiler(moduleName,modulePath,originCode)
+        if(!module) return;
         const completedCode = this.loadLoader(modulePath,module.source)
         module.source = completedCode
         return module;
@@ -90,7 +75,7 @@ export default class Compiler{
             const requirePath = moduleItem[2].slice(1,-1)
             const moduleDir = path.dirname(modulePath)
             const moduleId = UnixPath(path.resolve(moduleDir,requirePath))
-            if(this.alreadyModule.has(moduleId)) return
+            if(this.alreadyModule.has(moduleId)) continue;
             let requireModule = this.buildModule(requirePath,moduleId)
             module.dependenices.add(requireModule)
             this.module.add(requireModule)
@@ -114,7 +99,7 @@ export default class Compiler{
             }
             s.overwrite(item.index,item.index+item[0].length,`import {${item[1]}} from '${item[2].slice(1,-1)}'`)
         }
-        const exReg = /\bexports|\bmodule.exports()/
+        // const exReg = /\bexports|\bmodule.exports()/
         return s.toString();
     }
     loadLoader(modulePath,code){
