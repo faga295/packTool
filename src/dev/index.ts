@@ -14,6 +14,7 @@ async function startDevServer(){
     try{
         var server = new Server(compiler,options)
         compiler.run()
+        compiler.addPublic()
     }catch(err){
         console.log(err);
     }

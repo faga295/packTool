@@ -156,6 +156,7 @@ export default class Compiler{
             this.writeFile(keyArr[i])
 
         }
+        this.hooks.done.call('')
         
     }
     checkFile(path:string):Promise<boolean>{
@@ -179,12 +180,10 @@ export default class Compiler{
         this.files.add(this.assets[assetKey])
         const dirExist = await this.checkFile(`${this.dev?'':this.rootPath}/dist`)
         if(!dirExist) this.fs.mkdirSync(`${this.dev?'':this.rootPath}/dist`)
-        const fileExist = await this.checkFile(`${this.dev?'':this.rootPath}/dist/output[${assetKey}].js`)
         this.fs.writeFileSync(`${this.dev?'':this.rootPath}/dist/output[${assetKey}].js`,this.assets[assetKey])
-        if(this.dev) this.addPublic()
     }
     async addPublic(){
-        const dirExist = await this.checkFile(`${this.rootPath}/public`)
+        const dirExist = await checkFile(`${this.rootPath}/public`)
         if(!dirExist) return
         const dir = fs.readdirSync(`${this.rootPath}/public`)
         for(const filepath of dir){
@@ -195,6 +194,10 @@ export default class Compiler{
     }
     getSourceModule(chunk){
         const {source,modules} = chunk
-        return `${modules.map(item=>item.source)}${source}`
+        return `const ws = new WebSocket('ws://localhost:8080')
+        ws.onmessage = function(e){
+            console.log('message:'+e.data);
+        }\n
+        ${modules.map(item=>item.source)}${source}`
     }
 }
