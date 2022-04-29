@@ -1,6 +1,6 @@
 import { SyncHook } from "tapable";
 import type { Program,Node } from 'estree'
-import { UnixPath,checkFile } from "./util.js";
+import { UnixPath,checkFile} from "./util.js";
 import type {Options} from '../type.js'
 import MagicString from 'magic-string';
 import fs from 'fs'
@@ -18,6 +18,8 @@ export default class Compiler{
     alreadyModule:InstanceType<typeof Set>;
     assets:Record<string,any>;
     files:InstanceType<typeof Set>
+    fs:any
+    dev:boolean
     constructor(options:any){
         this.options= options
         this.hooks = {
@@ -32,6 +34,8 @@ export default class Compiler{
         this.alreadyModule = new Set<any>()
         this.assets = {}
         this.files = new Set<any>()
+        this.fs = fs
+        this.dev = false;
     }
     run(){
         this.hooks.run.call('')
@@ -102,6 +106,9 @@ export default class Compiler{
         // const exReg = /\bexports|\bmodule.exports()/
         return s.toString();
     }
+    loadCommonModule(code:string){
+        // const reg = //
+    }
     loadLoader(modulePath,code){
         if(!this.options.module||!this.options.module.rules.length) return;
         const rules:rule[] = Array.from(this.options.module.rules);
@@ -147,15 +154,44 @@ export default class Compiler{
         let keyArr=Object.keys(this.assets)
         for(let i=0;i<keyArr.length;i++){
             this.writeFile(keyArr[i])
-        }
-    }
 
+        }
+        
+    }
+    checkFile(path:string):Promise<boolean>{
+        return new Promise((resolve)=>{
+            if(this.dev){
+                const fileExist = this.fs.existsSync(path)
+                if(!fileExist) resolve(false)
+                else resolve(true)
+            }else{
+                fs.access(path,(err)=>{
+                    if(err){
+                        resolve(false)
+                    }else{
+                        resolve(true)
+                    }
+                })
+            }
+        })
+    }
     async writeFile(assetKey){
         this.files.add(this.assets[assetKey])
-        const dirExist = await checkFile(`${this.rootPath}/dist`)
-        if(!dirExist) fs.mkdirSync(`${this.rootPath}/dist`)
-        const fileExist = await checkFile(`${this.rootPath}/dist/output[${assetKey}].js`)
-        fs.writeFileSync(`${this.rootPath}/dist/output[${assetKey}].js`,this.assets[assetKey])
+        const dirExist = await this.checkFile(`${this.dev?'':this.rootPath}/dist`)
+        if(!dirExist) this.fs.mkdirSync(`${this.dev?'':this.rootPath}/dist`)
+        const fileExist = await this.checkFile(`${this.dev?'':this.rootPath}/dist/output[${assetKey}].js`)
+        this.fs.writeFileSync(`${this.dev?'':this.rootPath}/dist/output[${assetKey}].js`,this.assets[assetKey])
+        if(this.dev) this.addPublic()
+    }
+    async addPublic(){
+        const dirExist = await this.checkFile(`${this.rootPath}/public`)
+        if(!dirExist) return
+        const dir = fs.readdirSync(`${this.rootPath}/public`)
+        for(const filepath of dir){
+            const content = fs.readFileSync(`${this.rootPath}/public/`+filepath,'utf-8')
+            console.log(filepath);
+            this.fs.writeFileSync('/'+filepath,content)
+        }
     }
     getSourceModule(chunk){
         const {source,modules} = chunk

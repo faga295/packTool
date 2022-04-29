@@ -8,12 +8,12 @@ async function startDevServer(){
     
     try{
         var {compiler,options} = await packTool()
-        compiler.run()
     }catch(err){
         console.log(err)
     }
     try{
         var server = new Server(compiler,options)
+        compiler.run()
     }catch(err){
         console.log(err);
     }
