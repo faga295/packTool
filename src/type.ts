@@ -29,5 +29,6 @@ export interface  Options{
 }
 export interface DevServer{
     port:number
+    hot:boolean
 }
 export type CompilerInstance = InstanceType<typeof Compiler>

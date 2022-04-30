@@ -30,13 +30,14 @@ export default class Server{
         this.app.use(middleware)
     }
     createServer(){
-        this.app.listen(this.options.devServer.port,()=>{
+        this.compiler.hooks.done.tap('log',()=>{
             console.log('App running at:')
             console.log(`- Local:    \x1B[36mhttp://localhost:${this.options.devServer.port}/\x1B[0m`)
             console.log(`- Network:    \x1B[36mhttp://192.168.2.103:${this.options.devServer.port}/\x1B[0m`)
             console.log('Note that the development build is not optimized.')
             console.log('To create a production build, run \x1B[36mnpm run build\x1B[0m');
         })
+        this.app.listen(this.options.devServer.port)
     }
     setupStatic(){
         const html = fs.readFileSync(this.compiler.rootPath+'/public/index.html','utf-8')
@@ -57,15 +58,15 @@ export default class Server{
         this.listenFiles(this.compiler.rootPath+'/public',this.compiler,pubCallback)
     }
     createsocket(){
+        const compiler = this.compiler
+        const options = this.options
         const wss = new WebSocketServer({
             port:8080
         })
-        const compiler = this.compiler
         wss.on('connection', function connection(ws) {
             this.ws = ws;
             compiler.hooks.done.tap('dev',()=>{
-                ws.send('ok')
-                console.log('done');
+                if(!options.devServer.hot) ws.send('ok')
             })
         });
           

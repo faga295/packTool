@@ -19,8 +19,11 @@ export async function getOptions(){
 }
 function mergeOptions(options:Options){
     const defaultOptions = {
+        entry:['./src/index.js'],
+        output:'/dist',
         devServer:{
             port:3000,
+            hot:false
         }
     }
     return _.merge(defaultOptions,options)
